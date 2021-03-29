@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { UserContext } from "../../Context/UserContext";
+import { UserContext } from "../../context/UserContext";
 import { useHistory } from "react-router-dom";
 
 const Login = () => {

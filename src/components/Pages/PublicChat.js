@@ -2,9 +2,19 @@ import React from "react";
 import styled from "styled-components";
 import Messages from "../Messages";
 import Users from "../Users";
+import Socket from "../../socket/app";
+import { UserContext } from "../../context/UserContext";
+
+const socket = new Socket();
 
 const PublicChat = () => {
   const [toggle, setToggle] = React.useState(false);
+  const [user] = React.useContext(UserContext);
+
+  React.useEffect(() => {
+    socket.sendName(user.name);
+  }, []);
+
   return (
     <Container>
       <ChatDiv>
