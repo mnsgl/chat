@@ -2,32 +2,11 @@ import React from "react";
 import User from "./User";
 import styled from "styled-components";
 
-const Users = () => {
-  let data = [
-    "ali",
-    "ali",
-    "mehmet",
-    "can",
-    "kemal",
-    "mustafa",
-    "zeynep",
-    "ipek",
-    "canan",
-    "mehmet",
-    "can",
-    "kemal",
-    "mustafa",
-    "zeynep",
-    "ipek",
-    "canan",
-    "bulent",
-    "pelin",
-  ];
+const Users = ({ users }) => {
+  console.log("users : ", users);
   return (
     <UserArea>
-      {data.map((item, i) => (
-        <User key={i} />
-      ))}
+      {users && users.map((user, i) => <User key={i} user={user} />)}
     </UserArea>
   );
 };

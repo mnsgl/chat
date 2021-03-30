@@ -4,11 +4,12 @@ import { UserContext } from "../../context/UserContext";
 import { useHistory } from "react-router-dom";
 
 const Login = () => {
-  const [user, setUser] = React.useContext(UserContext);
+  const [, setUser] = React.useContext(UserContext).user;
   const [name, setName] = React.useState("");
   const [pass, setPass] = React.useState("");
   const ref = React.useRef(null);
   const history = useHistory();
+
   const login = async () => {
     if (!name || !pass) {
       ref.current.style.visibility = "visible";

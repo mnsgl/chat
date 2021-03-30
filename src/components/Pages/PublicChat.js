@@ -5,15 +5,35 @@ import Users from "../Users";
 import Socket from "../../socket/app";
 import { UserContext } from "../../context/UserContext";
 
-const socket = new Socket();
+const socket = new Socket("http://localhost:5000", {
+  transports: ["websocket", "polling", "flashsocket"],
+});
+
+const compare = (list1, list2) => {
+  return JSON.stringify(list1) !== JSON.stringify(list2);
+};
 
 const PublicChat = () => {
+  const [message, setMessage] = React.useState("");
   const [toggle, setToggle] = React.useState(false);
-  const [user] = React.useContext(UserContext);
+  const [user] = React.useContext(UserContext).user;
+  const [users, setUsers] = React.useContext(UserContext).users;
 
   React.useEffect(() => {
-    socket.sendName(user.name);
-  }, []);
+    socket.start(user.user.name);
+    let timer = setInterval(() => {
+      if (compare(socket.getUsers(), users)) {
+        setUsers([...socket.getUsers()]);
+      }
+    }, 1000);
+    return () => {
+      clearInterval(timer);
+    };
+  }, [setUsers, user]);
+
+  React.useEffect(() => {
+    //console.log(users);
+  }, [users]);
 
   return (
     <Container>
@@ -23,12 +43,23 @@ const PublicChat = () => {
             <Messages />
           </Chat>
           <TextDiv>
-            <Input placeholder="Type someting..." />
-            <SendButton>Send</SendButton>
+            <Input
+              placeholder="Type someting..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+            <SendButton
+              onClick={() => {
+                socket.sendMessage(message);
+                setMessage("");
+              }}
+            >
+              Send
+            </SendButton>
           </TextDiv>
         </LeftSide>
         <RightSide toggle={toggle}>
-          <Users />
+          <Users users={users} />
         </RightSide>
         <Toggle onClick={() => setToggle(!toggle)}>
           <Img toggle={toggle} src="/icons/arrow.png" />

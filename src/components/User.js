@@ -1,13 +1,16 @@
 import React from "react";
 import styled from "styled-components";
 
-const User = () => {
+const User = ({ user }) => {
+  console.log("user : ", user);
   return (
     <>
-      <UserItem>
-        <MessageAvatar>B</MessageAvatar>
-        <UserInfo>ali mehmet</UserInfo>
-      </UserItem>
+      {user && (
+        <UserItem>
+          <MessageAvatar>{user.slice(0, 1)}</MessageAvatar>
+          <UserInfo>{user}</UserInfo>
+        </UserItem>
+      )}
       <hr style={{ marginBottom: "0px", marginTop: "0px" }} />
     </>
   );
@@ -34,6 +37,7 @@ const MessageAvatar = styled.div`
   font-size: 28px;
   line-height: 40px;
   color: white;
+  text-transform: uppercase;
 `;
 
 const UserInfo = styled.p`
