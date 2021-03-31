@@ -4,12 +4,15 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { UserProvider } from "./context/UserContext";
+import { SocketProvider } from "./context/SocketContext";
 
 ReactDOM.render(
   <React.StrictMode>
-    <UserProvider>
-      <App />
-    </UserProvider>
+    <SocketProvider>
+      <UserProvider>
+        <App />
+      </UserProvider>
+    </SocketProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );

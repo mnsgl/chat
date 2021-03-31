@@ -18,8 +18,6 @@ const Login = () => {
       "http://localhost:5000/api/user/login/" + name + "/" + pass,
       { method: "GET" }
     );
-    console.log(name);
-    console.log(pass);
     if (response.status === 404) {
       // error
       return;

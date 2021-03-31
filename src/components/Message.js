@@ -1,19 +1,13 @@
 import React from "react";
 import styled from "styled-components";
 
-const Message = (props) => {
-  let userData = props.userData;
+const Message = ({ userAndMessage }) => {
+  let { name, msg } = userAndMessage;
   return (
     <>
       <MessageItem>
-        <MessageAvatar>A</MessageAvatar>
-        <MessageText>
-          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
-          nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,
-          sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
-          rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem
-          ipsum dolor sit amet.
-        </MessageText>
+        <MessageAvatar>{name.slice(0, 1)}</MessageAvatar>
+        <MessageText>{msg}</MessageText>
       </MessageItem>
       <hr style={{ margin: "0px auto" }} />
     </>

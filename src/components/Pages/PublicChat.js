@@ -2,18 +2,15 @@ import React from "react";
 import styled from "styled-components";
 import Messages from "../Messages";
 import Users from "../Users";
-import Socket from "../../socket/app";
 import { UserContext } from "../../context/UserContext";
-
-const socket = new Socket("http://localhost:5000", {
-  transports: ["websocket", "polling", "flashsocket"],
-});
+import { SocketContext } from "../../context/SocketContext";
 
 const compare = (list1, list2) => {
   return JSON.stringify(list1) !== JSON.stringify(list2);
 };
 
 const PublicChat = () => {
+  const [socket] = React.useContext(SocketContext);
   const [message, setMessage] = React.useState("");
   const [toggle, setToggle] = React.useState(false);
   const [user] = React.useContext(UserContext).user;
@@ -21,6 +18,7 @@ const PublicChat = () => {
 
   React.useEffect(() => {
     socket.start(user.user.name);
+    //setUsers([...socket.getUsers()]); // when user first login
     let timer = setInterval(() => {
       if (compare(socket.getUsers(), users)) {
         setUsers([...socket.getUsers()]);
@@ -29,18 +27,14 @@ const PublicChat = () => {
     return () => {
       clearInterval(timer);
     };
-  }, [setUsers, user]);
-
-  React.useEffect(() => {
-    //console.log(users);
-  }, [users]);
+  }, [setUsers, user, socket]);
 
   return (
     <Container>
       <ChatDiv>
         <LeftSide toggle={toggle}>
           <Chat>
-            <Messages />
+            <Messages socket={socket} />
           </Chat>
           <TextDiv>
             <Input

@@ -1,20 +1,22 @@
 import { io } from "socket.io-client";
 
 class Socket {
-  constructor(domain, config) {
-    this.socket = null;
+  constructor(domain) {
+    this._config = { transports: ["websocket", "polling", "flashsocket"] };
+    this._socket = io(domain, this._config);
+    //this._socket = null;
+
     this.domain = domain;
-    this.config = config;
     this._users = [];
   }
   start(name) {
-    this.socket = io(this.domain, this.config);
+    //this._socket = io(this.domain, this._config);
     this.sendName(name);
     this.listenUsers();
   }
 
   listenUsers() {
-    this.socket.on("get-users", (users) => {
+    this._socket.on("get-users", (users) => {
       this._users = JSON.parse(users);
     });
   }
@@ -24,14 +26,19 @@ class Socket {
   }
 
   sendName(name) {
-    this.socket.emit("u-name", name);
+    console.log("name : ", name);
+    this._socket.emit("u-name", name);
   }
 
   sendMessage(message) {
-    if (message) {
+    if (!message) {
       return;
     }
-    this.socket.emit("send-pub-message", message);
+    this._socket.emit("send-pub-message", message);
+  }
+
+  getSocket() {
+    return this._socket;
   }
 }
 
