@@ -1,12 +1,14 @@
 import React from "react";
 import styled from "styled-components";
 import { useHistory } from "react-router-dom";
+import LogOut from "../LogOut";
 
 const MainPage = () => {
   let history = useHistory();
   return (
     <>
       <Container>
+        <LogOut></LogOut>
         <ButtonDiv>
           <Button onClick={() => history.push("/login")}>Giriş Yap</Button>
           <Button onClick={() => history.push("/register")}>Kayıt Ol</Button>

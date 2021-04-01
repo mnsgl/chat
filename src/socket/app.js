@@ -5,14 +5,18 @@ class Socket {
     this._config = { transports: ["websocket", "polling", "flashsocket"] };
     this._socket = io(domain, this._config);
     //this._socket = null;
+    this.isStart = true;
 
     this.domain = domain;
     this._users = [];
   }
   start(name) {
     //this._socket = io(this.domain, this._config);
-    this.sendName(name);
-    this.listenUsers();
+    if (this.isStart) {
+      this.sendName(name);
+      this.listenUsers();
+    }
+    this.isStart = false;
   }
 
   listenUsers() {
