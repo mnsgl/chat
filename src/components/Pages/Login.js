@@ -30,7 +30,7 @@ const Login = () => {
 
     let result = await response.json();
     setUser(result);
-    history.push("/publichat");
+    history.push("/chat");
   };
   return (
     <Container>

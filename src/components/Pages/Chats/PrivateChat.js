@@ -1,79 +1,67 @@
 import React from "react";
 import styled from "styled-components";
-import Messages from "../Messages";
-import Users from "../Users";
-import { UserContext } from "../../context/UserContext";
-import { SocketContext } from "../../context/SocketContext";
-import LogOut from "../LogOut";
+import Messages from "../../Messages";
+import Users from "../../Users";
+import LogOut from "../../LogOut";
 
 const compare = (list1, list2) => {
   return JSON.stringify(list1) !== JSON.stringify(list2);
 };
 
-const PublicChat = () => {
-  const [socket] = React.useContext(SocketContext);
+const PublicChat = ({ socket, user, users, setUsers }) => {
   const [message, setMessage] = React.useState("");
   const [toggle, setToggle] = React.useState(false);
-  const [user] = React.useContext(UserContext).user;
-  const [users, setUsers] = React.useContext(UserContext).users;
+  const [timerState, setTimerState] = React.useState(false);
 
   React.useEffect(() => {
-    socket.start(user.user.name);
-    let timer = setInterval(() => {
-      if (compare(socket.getUsers(), users)) {
-        setUsers([...socket.getUsers()]);
-      }
-    }, 1000);
-    return () => {
-      clearInterval(timer);
-    };
-  }, [setUsers, user, socket]);
+    if (!timerState) {
+      setTimerState(true);
+      socket.start(user.user.name);
+      let timer = setInterval(() => {
+        if (compare(socket.getUsers(), users)) {
+          setUsers([...socket.getUsers()]);
+        }
+      }, 1000);
+      return () => {
+        clearInterval(timer);
+      };
+    }
+  }, [setUsers, user, socket, timerState, setTimerState]);
 
   return (
     <>
       <LogOut></LogOut>
-      <Container>
-        <ChatDiv>
-          <LeftSide toggle={toggle}>
-            <Chat>
-              <Messages socket={socket} />
-            </Chat>
-            <TextDiv>
-              <Input
-                placeholder="Type someting..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              />
-              <SendButton
-                onClick={() => {
-                  socket.sendMessage(message);
-                  setMessage("");
-                }}
-              >
-                Send
-              </SendButton>
-            </TextDiv>
-          </LeftSide>
-          <RightSide toggle={toggle}>
-            <Users users={users} />
-          </RightSide>
-          <Toggle onClick={() => setToggle(!toggle)}>
-            <Img toggle={toggle} src="/icons/arrow.png" />
-          </Toggle>
-        </ChatDiv>
-      </Container>
+      <ChatDiv>
+        <LeftSide toggle={toggle}>
+          <Chat>
+            <Messages socket={socket} />
+          </Chat>
+          <TextDiv>
+            <Input
+              placeholder="Type someting..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+            <SendButton
+              onClick={() => {
+                socket.sendMessage(message);
+                setMessage("");
+              }}
+            >
+              Send
+            </SendButton>
+          </TextDiv>
+        </LeftSide>
+        <RightSide toggle={toggle}>
+          <Users users={users} />
+        </RightSide>
+        <Toggle onClick={() => setToggle(!toggle)}>
+          <Img toggle={toggle} src="/icons/arrow.png" />
+        </Toggle>
+      </ChatDiv>
     </>
   );
 };
-
-const Container = styled.div`
-  position: relative;
-  width: 1000px;
-  height: 100vh;
-  margin: auto;
-  display: flex;
-  align-items: center;
-`;
 
 const RightSide = styled.div`
   background-color: rgba(230, 230, 220, 1);
