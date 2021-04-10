@@ -4,15 +4,17 @@ class Socket {
   constructor(domain) {
     this._config = { transports: ["websocket", "polling", "flashsocket"] };
     this._socket = io(domain, this._config);
-    //this._socket = null;
+    this._owner = null;
     this.isStart = true;
-
     this.domain = domain;
     this._users = [];
+    this._privUsers = [];
+    this._privRoomId = null;
   }
   start(name) {
     //this._socket = io(this.domain, this._config);
     if (this.isStart) {
+      this._owner = name;
       this.sendName(name);
       this.listenUsers();
     }
@@ -32,6 +34,9 @@ class Socket {
   sendName(name) {
     console.log("name : ", name);
     this._socket.emit("u-name", name);
+    this._socket.on("get-num", (number) => {
+      console.log(number);
+    });
   }
 
   sendMessage(message) {
@@ -43,6 +48,32 @@ class Socket {
 
   getSocket() {
     return this._socket;
+  }
+
+  joinRoom(roomId) {
+    this._socket.emit("join-room", roomId);
+    this.listenPrivUsers();
+  }
+
+  createRoom() {
+    this._socket.emit("create-room", this._owner);
+    this._socket.on("priv-room-id", (id) => {
+      this._privRoomId = id;
+    });
+    this.listenPrivUsers();
+  }
+  getPrivUsers() {
+    return this._privUsers;
+  }
+
+  getPrivRoomId() {
+    return this._privRoomId;
+  }
+
+  listenPrivUsers() {
+    this._socket.on("get-priv-users", (users) => {
+      this._privUsers = JSON.parse(users);
+    });
   }
 }
 

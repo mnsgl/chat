@@ -3,9 +3,9 @@ https://github.com/mnsgl/chat.git
 
 # dependencies
 /node_modules
-/server
 /.pnp
 .pnp.js
+/server/node_modules
 
 # testing
 /coverage

@@ -2,66 +2,86 @@ import React from "react";
 import styled from "styled-components";
 import Messages from "../../Messages";
 import Users from "../../Users";
-import LogOut from "../../LogOut";
 
 const compare = (list1, list2) => {
   return JSON.stringify(list1) !== JSON.stringify(list2);
 };
 
-const PublicChat = ({ socket, user, users, setUsers }) => {
+const PublicChat = ({ socket, chat }) => {
   const [message, setMessage] = React.useState("");
   const [toggle, setToggle] = React.useState(false);
-  const [timerState, setTimerState] = React.useState(false);
+  const [isRoomOpen, setIsRoomOpen] = React.useState(false);
+  //const [users, setUsers] = React.useState([]);
+  let users = ["ali", "mehmet"];
 
-  React.useEffect(() => {
-    if (!timerState) {
-      setTimerState(true);
-      socket.start(user.user.name);
-      let timer = setInterval(() => {
-        if (compare(socket.getUsers(), users)) {
-          setUsers([...socket.getUsers()]);
-        }
-      }, 1000);
-      return () => {
-        clearInterval(timer);
-      };
-    }
-  }, [setUsers, user, socket, timerState, setTimerState]);
+  const join = () => {
+    let res = prompt("name : ");
+    socket.joinRoom(res);
+    setIsRoomOpen(true);
+  };
+  const create = () => {
+    //socket.createRoom();
+    setIsRoomOpen(true);
+  };
+
+  const close = () => {
+    //socket.closeRoom();
+    setIsRoomOpen(false);
+  };
 
   return (
     <>
-      <LogOut></LogOut>
-      <ChatDiv>
-        <LeftSide toggle={toggle}>
-          <Chat>
-            <Messages socket={socket} />
-          </Chat>
-          <TextDiv>
-            <Input
-              placeholder="Type someting..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-            <SendButton
-              onClick={() => {
-                socket.sendMessage(message);
-                setMessage("");
-              }}
-            >
-              Send
-            </SendButton>
-          </TextDiv>
-        </LeftSide>
-        <RightSide toggle={toggle}>
-          <Users users={users} />
-        </RightSide>
-        <Toggle onClick={() => setToggle(!toggle)}>
-          <Img toggle={toggle} src="/icons/arrow.png" />
-        </Toggle>
-      </ChatDiv>
+      <Container vis={chat}>
+        <Buttons>
+          <Button onClick={create} disabled={isRoomOpen}>
+            Oluştur
+          </Button>
+          <Button onClick={join} disabled={isRoomOpen}>
+            Katıl
+          </Button>
+          <Button onClick={close} disabled={!isRoomOpen}>
+            Sonlandır
+          </Button>
+        </Buttons>
+        <ChatDiv vis={chat}>
+          <LeftSide toggle={toggle}>
+            <Chat>
+              <Messages socket={socket} />
+            </Chat>
+            <TextDiv>
+              <Input
+                placeholder="Type someting..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+              <SendButton
+                onClick={() => {
+                  socket.sendMessage(message);
+                  setMessage("");
+                }}
+              >
+                Send
+              </SendButton>
+            </TextDiv>
+          </LeftSide>
+          <RightSide toggle={toggle}>
+            <Users users={users} />
+          </RightSide>
+          <Toggle onClick={() => setToggle(!toggle)}>
+            <Img toggle={toggle} src="/icons/arrow.png" />
+          </Toggle>
+        </ChatDiv>
+      </Container>
     </>
   );
 };
+
+const Container = styled.div`
+  visibility: ${(p) => (p.vis ? "hidden" : "visible")};
+  position: absolute;
+  width: 100%;
+  margin-top: 200px;
+`;
 
 const RightSide = styled.div`
   background-color: rgba(230, 230, 220, 1);
@@ -150,6 +170,34 @@ const Img = styled.img`
   transform: ${(p) => (p.toggle ? "rotate(0deg)" : "rotate(180deg)")};
   width: 40px;
   height: 40px;
+`;
+
+const Buttons = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
+const Button = styled.button`
+  outline: none;
+  margin-bottom: 50px;
+  background-color: transparent;
+  border-radius: 5px;
+  font-size: 20px;
+  color: rgba(254, 254, 254, 0.8);
+  border: 3px solid rgba(0, 0, 0, 0.5);
+  margin-left: 50px;
+  padding: 10px 30px;
+  //transition: all 0.3s ease;
+  &:hover {
+    cursor: pointer;
+    border: 3px solid rgba(0, 0, 0, 0.8);
+    color: rgba(254, 254, 254, 1);
+  }
+  &:disabled {
+    cursor: inherit;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    color: rgba(254, 254, 254, 0.4);
+  }
 `;
 
 export default PublicChat;

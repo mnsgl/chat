@@ -7,7 +7,7 @@ const compare = (list1, list2) => {
   return JSON.stringify(list1) !== JSON.stringify(list2);
 };
 
-const PublicChat = ({ socket, user, users, setUsers }) => {
+const PublicChat = ({ socket, user, users, setUsers, chat }) => {
   const [message, setMessage] = React.useState("");
   const [toggle, setToggle] = React.useState(false);
 
@@ -25,7 +25,7 @@ const PublicChat = ({ socket, user, users, setUsers }) => {
 
   return (
     <>
-      <ChatDiv>
+      <ChatDiv vis={chat}>
         <LeftSide toggle={toggle}>
           <Chat>
             <Messages socket={socket} />
@@ -72,6 +72,7 @@ const LeftSide = styled.div`
 `;
 
 const ChatDiv = styled.div`
+  visibility: ${(p) => (!p.vis ? "hidden" : "visible")};
   box-shadow: 0px 0px 40px 1px rgba(0, 0, 0, 0.5);
   display: flex;
   width: 100%;

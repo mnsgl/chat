@@ -10,32 +10,34 @@ function Chat() {
   const [user] = React.useContext(UserContext).user;
   const [users, setUsers] = React.useContext(UserContext).users;
   const [socket] = React.useContext(SocketContext);
-  const join = () => {
-    console.log(prompt("name : "));
+  const [chat, setChat] = React.useState(true);
+
+  const privChat = () => {
+    setChat(false);
   };
-  const create = () => {};
+  const pubChat = () => {
+    setChat(true);
+  };
   return (
     <>
       <LogOut></LogOut>
       <Container>
         <Buttons>
-          <Button onClick={join}>Katıl</Button>
-          <Button onClick={create}>Oluştur</Button>
+          <Button disabled={chat} onClick={pubChat}>
+            Genel Sohbet
+          </Button>
+          <Button disabled={!chat} onClick={privChat}>
+            Özel Sohbet
+          </Button>
         </Buttons>
         <PublicChat
+          chat={chat}
           socket={socket}
           user={user}
           users={users}
           setUsers={setUsers}
         ></PublicChat>
-        {false && (
-          <PrivateChat
-            socket={socket}
-            user={user}
-            users={users}
-            setUsers={setUsers}
-          ></PrivateChat>
-        )}
+        <PrivateChat chat={chat} socket={socket}></PrivateChat>
       </Container>
     </>
   );
@@ -53,7 +55,10 @@ const Container = styled.div`
 `;
 
 const Buttons = styled.div`
+  //z-index: 999;
+  width: 100%;
   display: flex;
+  justify-content: space-between;
 `;
 
 const Button = styled.button`
@@ -64,13 +69,17 @@ const Button = styled.button`
   font-size: 20px;
   color: rgba(254, 254, 254, 0.8);
   border: 2px solid rgba(0, 0, 0, 0.3);
-  margin-left: 50px;
   padding: 10px 30px;
   transition: all 0.3s ease;
   &:hover {
     cursor: pointer;
     border: 2px solid rgba(0, 0, 0, 0.6);
     color: rgba(254, 254, 254, 1);
+  }
+  &:disabled {
+    cursor: inherit;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    color: rgba(254, 254, 254, 0.4);
   }
 `;
 
