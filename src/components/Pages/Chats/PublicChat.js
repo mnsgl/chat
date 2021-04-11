@@ -10,6 +10,14 @@ const compare = (list1, list2) => {
 const PublicChat = ({ socket, user, users, setUsers, chat }) => {
   const [message, setMessage] = React.useState("");
   const [toggle, setToggle] = React.useState(false);
+  const refs = [React.useRef(null), React.useRef(null), React.useRef(null)];
+
+  React.useEffect(() => {
+    refs.forEach((ref) => {
+      if (!chat) ref.current.style.transition = "none";
+      else ref.current.style.transition = "all .3s ease";
+    });
+  }, [chat, refs]);
 
   React.useEffect(() => {
     socket.start(user.user.name);
@@ -26,7 +34,7 @@ const PublicChat = ({ socket, user, users, setUsers, chat }) => {
   return (
     <>
       <ChatDiv vis={chat}>
-        <LeftSide toggle={toggle}>
+        <LeftSide ref={refs[0]} toggle={toggle}>
           <Chat>
             <Messages socket={socket} />
           </Chat>
@@ -46,11 +54,11 @@ const PublicChat = ({ socket, user, users, setUsers, chat }) => {
             </SendButton>
           </TextDiv>
         </LeftSide>
-        <RightSide toggle={toggle}>
+        <RightSide ref={refs[1]} toggle={toggle}>
           <Users users={users} />
         </RightSide>
         <Toggle onClick={() => setToggle(!toggle)}>
-          <Img toggle={toggle} src="/icons/arrow.png" />
+          <Img ref={refs[2]} toggle={toggle} src="/icons/arrow.png" />
         </Toggle>
       </ChatDiv>
     </>

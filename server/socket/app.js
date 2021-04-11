@@ -63,6 +63,18 @@ class Socket {
         socket.join(roomId);
         this.sendPrivUsers(roomId);
       });
+
+      socket.on("close-room", (roomId) => {
+        this.io.sockets.clients(roomId).forEach((client) => {
+          client.leave(roomId);
+        });
+        this.sendPrivUsers(roomId);
+      });
+
+      socket.on("leave-room", (roomId) => {
+        socket.leave(roomId);
+        this.sendPrivUsers(roomId);
+      });
     });
   }
 }

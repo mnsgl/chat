@@ -11,40 +11,72 @@ const PublicChat = ({ socket, chat }) => {
   const [message, setMessage] = React.useState("");
   const [toggle, setToggle] = React.useState(false);
   const [isRoomOpen, setIsRoomOpen] = React.useState(false);
+  const [cOwner, setCOwner] = React.useState(false);
+  const [privRoomId, setPrivRoomId] = React.useState(null);
+  const refs = [
+    React.useRef(null),
+    React.useRef(null),
+    React.useRef(null),
+    React.useRef(null),
+    React.useRef(null),
+    React.useRef(null),
+  ];
   //const [users, setUsers] = React.useState([]);
   let users = ["ali", "mehmet"];
 
   const join = () => {
-    let res = prompt("name : ");
-    socket.joinRoom(res);
-    setIsRoomOpen(true);
+    let res = prompt("Enter the room id :");
+    if (res === null || res === "") {
+      return;
+    } else {
+      setPrivRoomId(res);
+      socket.joinRoom(res);
+      setIsRoomOpen(true);
+      setCOwner(false);
+    }
   };
   const create = () => {
-    //socket.createRoom();
+    socket.createRoom();
+    setCOwner(true);
     setIsRoomOpen(true);
+    setPrivRoomId(socket.getPrivRoomId());
   };
 
   const close = () => {
-    //socket.closeRoom();
+    if (cOwner) {
+      socket.closeRoom();
+    } else {
+      socket.leaveRoom(privRoomId);
+      setPrivRoomId(null);
+    }
+    setCOwner(false);
     setIsRoomOpen(false);
   };
+
+  React.useEffect(() => {
+    refs.forEach((ref) => {
+      if (chat) ref.current.style.transition = "none";
+      else ref.current.style.transition = "all .3s ease";
+    });
+    //rsd.current.style.transition = "none";
+  }, [chat, refs]);
 
   return (
     <>
       <Container vis={chat}>
         <Buttons>
-          <Button onClick={create} disabled={isRoomOpen}>
+          <Button ref={refs[0]} onClick={create} disabled={isRoomOpen}>
             Oluştur
           </Button>
-          <Button onClick={join} disabled={isRoomOpen}>
+          <Button ref={refs[1]} onClick={join} disabled={isRoomOpen}>
             Katıl
           </Button>
-          <Button onClick={close} disabled={!isRoomOpen}>
+          <Button ref={refs[2]} onClick={close} disabled={!isRoomOpen}>
             Sonlandır
           </Button>
         </Buttons>
         <ChatDiv vis={chat}>
-          <LeftSide toggle={toggle}>
+          <LeftSide ref={refs[3]} toggle={toggle}>
             <Chat>
               <Messages socket={socket} />
             </Chat>
@@ -64,11 +96,11 @@ const PublicChat = ({ socket, chat }) => {
               </SendButton>
             </TextDiv>
           </LeftSide>
-          <RightSide toggle={toggle}>
+          <RightSide ref={refs[4]} toggle={toggle}>
             <Users users={users} />
           </RightSide>
           <Toggle onClick={() => setToggle(!toggle)}>
-            <Img toggle={toggle} src="/icons/arrow.png" />
+            <Img ref={refs[5]} toggle={toggle} src="/icons/arrow.png" />
           </Toggle>
         </ChatDiv>
       </Container>
@@ -187,7 +219,7 @@ const Button = styled.button`
   border: 3px solid rgba(0, 0, 0, 0.5);
   margin-left: 50px;
   padding: 10px 30px;
-  //transition: all 0.3s ease;
+  transition: all 0.3s ease;
   &:hover {
     cursor: pointer;
     border: 3px solid rgba(0, 0, 0, 0.8);

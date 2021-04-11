@@ -75,6 +75,14 @@ class Socket {
       this._privUsers = JSON.parse(users);
     });
   }
+
+  closeRoom() {
+    this._socket.emit("close-room", this._privRoomId);
+  }
+
+  leaveRoom(roomId) {
+    this._socket.emit("leave-room", roomId);
+  }
 }
 
 export default Socket;
