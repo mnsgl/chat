@@ -12,7 +12,12 @@ class Socket {
   }
 
   sendPrivUsers(roomId) {
-    let users = [...this.io.sockets.adapter.rooms.get(roomId)];
+    let asdf = this.io.sockets.adapter.rooms.get(roomId);
+    if (!asdf) {
+      this.io.to(roomId).emit("get-priv-users", JSON.stringify([]));
+      return;
+    }
+    let users = [...asdf];
     users = users.filter((id) => {
       if (this._cons[id]) {
         return this._cons[id];
@@ -44,13 +49,22 @@ class Socket {
 
       socket.on("create-room", (msg) => {
         socket.join(socketRoomId);
-        socket.emit("priv-room-id", socketRoomId);
+        this.io.sockets.in(socketRoomId).emit("priv-room-id", socketRoomId);
+        console.log("gonderildi");
         this.sendPrivUsers(socketRoomId);
 
         //console.log(this.io.sockets.adapter.rooms.get(socketRoomId.toString()));
         //this.io.sockets.adapter.rooms.get(socketRoomId.toString())
         //this.io.in(socketRoomId.toString()).allSockets()
         //this.io.sockets.adapter.rooms
+      });
+      socket.on("send-priv-message", (message) => {
+        this.io
+          .to(socketRoomId)
+          .emit(
+            "priv-chat",
+            JSON.stringify({ name: this._cons[socket.id], msg: message })
+          );
       });
       socket.on("get-num", (msg) => {
         socket.emit(
@@ -65,13 +79,12 @@ class Socket {
       });
 
       socket.on("close-room", (roomId) => {
-        this.io.sockets.clients(roomId).forEach((client) => {
-          client.leave(roomId);
-        });
-        this.sendPrivUsers(roomId);
+        console.log(this.io.sockets.socketsLeave(roomId));
+        //this.sendPrivUsers(roomId);
       });
 
       socket.on("leave-room", (roomId) => {
+        console.log("room iD : ", roomId);
         socket.leave(roomId);
         this.sendPrivUsers(roomId);
       });

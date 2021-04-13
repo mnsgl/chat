@@ -13,6 +13,10 @@ const PublicChat = ({ socket, chat }) => {
   const [isRoomOpen, setIsRoomOpen] = React.useState(false);
   const [cOwner, setCOwner] = React.useState(false);
   const [privRoomId, setPrivRoomId] = React.useState(null);
+  const [privUsers, setPrivUsers] = React.useState([]);
+  let timer = null;
+  const timer1 = setInterval;
+  const notify = React.useRef(null);
   const refs = [
     React.useRef(null),
     React.useRef(null),
@@ -22,47 +26,99 @@ const PublicChat = ({ socket, chat }) => {
     React.useRef(null),
   ];
   //const [users, setUsers] = React.useState([]);
-  let users = ["ali", "mehmet"];
 
   const join = () => {
     let res = prompt("Enter the room id :");
     if (res === null || res === "") {
       return;
     } else {
+      console.log("priv room id : ", res);
       setPrivRoomId(res);
       socket.joinRoom(res);
       setIsRoomOpen(true);
       setCOwner(false);
+      getUsers();
     }
   };
   const create = () => {
     socket.createRoom();
     setCOwner(true);
     setIsRoomOpen(true);
-    setPrivRoomId(socket.getPrivRoomId());
+    test();
+    getUsers();
   };
 
   const close = () => {
     if (cOwner) {
       socket.closeRoom();
     } else {
+      clearInterval(timer);
       socket.leaveRoom(privRoomId);
       setPrivRoomId(null);
     }
     setCOwner(false);
     setIsRoomOpen(false);
+    clearInterval(timer1);
+    setPrivUsers([]);
   };
+
+  const test = () => {
+    timer1(() => {
+      if (privRoomId !== null) {
+        notify.current.style.visibility = "visible";
+        navigator.clipboard.writeText(socket.getPrivRoomId());
+        console.log("test");
+        clearInterval(timer1);
+        setTimeout(() => {
+          notify.current.style.visibility = "hidden";
+        }, 2000);
+      } else {
+        setPrivRoomId(socket.getPrivRoomId());
+      }
+    }, 100);
+  };
+
+  /*
+  React.useEffect(() => {
+    if (cOwner) {
+      timer1(() => {
+        if (privRoomId !== null) {
+          notify.current.style.visibility = "visible";
+          navigator.clipboard.writeText(socket.getPrivRoomId());
+          console.log("test");
+          clearInterval(timer1);
+          setTimeout(() => {
+            notify.current.style.visibility = "hidden";
+          }, 2000);
+        } else {
+          setPrivRoomId(socket.getPrivRoomId());
+        }
+      }, 100);
+    }
+  }, [privRoomId, setPrivRoomId, timer1, cOwner]);
+	*/
 
   React.useEffect(() => {
     refs.forEach((ref) => {
       if (chat) ref.current.style.transition = "none";
       else ref.current.style.transition = "all .3s ease";
     });
-    //rsd.current.style.transition = "none";
-  }, [chat, refs]);
+    return () => {
+      clearInterval(timer);
+    };
+  }, [chat, refs, timer]);
+
+  const getUsers = () => {
+    timer = setInterval(() => {
+      if (compare(socket.getPrivUsers(), privUsers)) {
+        setPrivUsers([...socket.getPrivUsers()]);
+      }
+    }, 1000);
+  };
 
   return (
     <>
+      <Notify ref={notify}>Kanal kodu panoya kopyalandi!</Notify>
       <Container vis={chat}>
         <Buttons>
           <Button ref={refs[0]} onClick={create} disabled={isRoomOpen}>
@@ -82,11 +138,13 @@ const PublicChat = ({ socket, chat }) => {
             </Chat>
             <TextDiv>
               <Input
+                disabled={!isRoomOpen}
                 placeholder="Type someting..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
               />
               <SendButton
+                disabled={!isRoomOpen}
                 onClick={() => {
                   socket.sendMessage(message);
                   setMessage("");
@@ -97,7 +155,7 @@ const PublicChat = ({ socket, chat }) => {
             </TextDiv>
           </LeftSide>
           <RightSide ref={refs[4]} toggle={toggle}>
-            <Users users={users} />
+            <Users users={privUsers} />
           </RightSide>
           <Toggle onClick={() => setToggle(!toggle)}>
             <Img ref={refs[5]} toggle={toggle} src="/icons/arrow.png" />
@@ -113,6 +171,7 @@ const Container = styled.div`
   position: absolute;
   width: 100%;
   margin-top: 200px;
+  margin-bottom: 100px;
 `;
 
 const RightSide = styled.div`
@@ -169,7 +228,6 @@ const SendButton = styled.a`
   display: flex;
   align-items: center;
   justify-content: center;
-  //border: 1px solid rgba(254, 254, 254, 0.9);
   box-shadow: 0px 0px 1px 1px rgba(254, 254, 254, 0.9);
   height: 60%;
   width: 10%;
@@ -230,6 +288,20 @@ const Button = styled.button`
     border: 1px solid rgba(0, 0, 0, 0.3);
     color: rgba(254, 254, 254, 0.4);
   }
+`;
+
+const Notify = styled.div`
+  visibility: hidden;
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 1px solid tomato;
+  padding: 10px 40px;
+  background-color: rgba(255, 99, 71, 0.8);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 20px;
+  border-radius: 5px;
 `;
 
 export default PublicChat;

@@ -59,6 +59,7 @@ class Socket {
     this._socket.emit("create-room", this._owner);
     this._socket.on("priv-room-id", (id) => {
       this._privRoomId = id;
+      console.log("alindi: ", id);
     });
     this.listenPrivUsers();
   }

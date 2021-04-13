@@ -6,7 +6,7 @@ const Messages = ({ socket }) => {
   const scrollRef = React.useRef(null);
   const [usersAndMessages, setUsersAndMessages] = React.useState([]);
   React.useEffect(() => {
-    socket.getSocket().on("chat", (msg) => {
+    socket.getSocket().on("priv-chat", (msg) => {
       let message = JSON.parse(msg);
       setUsersAndMessages((prev) => [...prev, message]);
       scrollRef.current.scrollTop =
