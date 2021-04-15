@@ -14,7 +14,8 @@ const PublicChat = ({ socket, chat }) => {
   const [cOwner, setCOwner] = React.useState(false);
   const [privRoomId, setPrivRoomId] = React.useState(null);
   const [privUsers, setPrivUsers] = React.useState([]);
-  let timer = null;
+  const tset = React.useRef(null);
+  let timer = React.useRef(null);
   const timer1 = setInterval;
   const notify = React.useRef(null);
   const refs = [
@@ -37,23 +38,22 @@ const PublicChat = ({ socket, chat }) => {
       socket.joinRoom(res);
       setIsRoomOpen(true);
       setCOwner(false);
-      getUsers();
+      //getUsers();
     }
   };
   const create = () => {
     socket.createRoom();
     setCOwner(true);
     setIsRoomOpen(true);
-    test();
-    getUsers();
+    //test();
   };
 
   const close = () => {
     if (cOwner) {
       socket.closeRoom();
     } else {
-      clearInterval(timer);
       socket.leaveRoom(privRoomId);
+      setInterval(timer.current);
       setPrivRoomId(null);
     }
     setCOwner(false);
@@ -78,43 +78,33 @@ const PublicChat = ({ socket, chat }) => {
     }, 100);
   };
 
-  /*
-  React.useEffect(() => {
-    if (cOwner) {
-      timer1(() => {
-        if (privRoomId !== null) {
-          notify.current.style.visibility = "visible";
-          navigator.clipboard.writeText(socket.getPrivRoomId());
-          console.log("test");
-          clearInterval(timer1);
-          setTimeout(() => {
-            notify.current.style.visibility = "hidden";
-          }, 2000);
-        } else {
-          setPrivRoomId(socket.getPrivRoomId());
-        }
-      }, 100);
-    }
-  }, [privRoomId, setPrivRoomId, timer1, cOwner]);
-	*/
-
   React.useEffect(() => {
     refs.forEach((ref) => {
       if (chat) ref.current.style.transition = "none";
       else ref.current.style.transition = "all .3s ease";
     });
-    return () => {
-      clearInterval(timer);
-    };
-  }, [chat, refs, timer]);
+  }, [chat, refs]);
 
-  const getUsers = () => {
-    timer = setInterval(() => {
-      if (compare(socket.getPrivUsers(), privUsers)) {
-        setPrivUsers([...socket.getPrivUsers()]);
-      }
-    }, 1000);
-  };
+  React.useEffect(() => {
+    if (isRoomOpen) {
+      timer.current = setInterval(() => {
+        if (compare(socket.getPrivUsers(), tset.current)) {
+          setPrivUsers([...socket.getPrivUsers()]);
+          tset.current = socket.getPrivUsers();
+        }
+      }, 1000);
+    } else {
+      timer.current && clearInterval(timer.current);
+      tset.current = [];
+    }
+    return () => {
+      timer.current && clearInterval(timer.current);
+    };
+  }, [isRoomOpen, socket, setPrivUsers, timer, tset]);
+
+  React.useEffect(() => {
+    console.log(privUsers);
+  }, [privUsers]);
 
   return (
     <>

@@ -46,6 +46,13 @@ class Socket {
     this._socket.emit("send-pub-message", message);
   }
 
+  sendPrivMessage(message) {
+    if (!message) {
+      return;
+    }
+    this._socket.emit("send-priv-message", message);
+  }
+
   getSocket() {
     return this._socket;
   }
@@ -74,6 +81,7 @@ class Socket {
   listenPrivUsers() {
     this._socket.on("get-priv-users", (users) => {
       this._privUsers = JSON.parse(users);
+      console.log("......... : " + this._privUsers.length);
     });
   }
 

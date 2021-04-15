@@ -11,13 +11,18 @@ class Socket {
     this.io.emit("get-users", JSON.stringify(users));
   }
 
-  sendPrivUsers(roomId) {
-    let asdf = this.io.sockets.adapter.rooms.get(roomId);
-    if (!asdf) {
-      this.io.to(roomId).emit("get-priv-users", JSON.stringify([]));
+  sendPrivUsers(roomId, isRoomClosed = false) {
+    let temp = this.io.sockets.adapter.rooms.get(roomId);
+    if (isRoomClosed) {
+      this.io.sockets.emit("get-priv-users", JSON.stringify([]));
       return;
     }
-    let users = [...asdf];
+    if (!temp) {
+      //this.io.to(roomId).emit("get-priv-users", JSON.stringify([]));
+      this.io.sockets.emit("get-priv-users", JSON.stringify([]));
+      return;
+    }
+    let users = [...temp];
     users = users.filter((id) => {
       if (this._cons[id]) {
         return this._cons[id];
@@ -79,6 +84,8 @@ class Socket {
       });
 
       socket.on("close-room", (roomId) => {
+        //this.io.to(roomId).emit("get-priv-users", JSON.stringify([]));
+        this.sendPrivUsers(roomId, true);
         console.log(this.io.sockets.socketsLeave(roomId));
         //this.sendPrivUsers(roomId);
       });
