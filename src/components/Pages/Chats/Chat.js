@@ -7,7 +7,7 @@ import { UserContext } from "../../../context/UserContext";
 import { SocketContext } from "../../../context/SocketContext";
 
 function Chat() {
-  const [user] = React.useContext(UserContext).user;
+  const [user, setUser] = React.useContext(UserContext).user;
   const [users, setUsers] = React.useContext(UserContext).users;
   const [socket] = React.useContext(SocketContext);
   const [chat, setChat] = React.useState(true);
@@ -18,6 +18,12 @@ function Chat() {
   const pubChat = () => {
     setChat(true);
   };
+
+  React.useEffect(() => {
+    return () => {
+      setUser({});
+    };
+  }, [setUser]);
   return (
     <>
       <LogOut></LogOut>
