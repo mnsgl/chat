@@ -14,10 +14,12 @@ class Socket {
   sendPrivUsers(roomId, isRoomClosed = false) {
     let temp = this.io.sockets.adapter.rooms.get(roomId);
     if (isRoomClosed) {
+      this.io.sockets.emit("is-closed", "closed");
       this.io.sockets.emit("get-priv-users", JSON.stringify([]));
       return;
     }
     if (!temp) {
+      // delete this if condition
       //this.io.to(roomId).emit("get-priv-users", JSON.stringify([]));
       this.io.sockets.emit("get-priv-users", JSON.stringify([]));
       return;
@@ -41,7 +43,8 @@ class Socket {
       });
       socket.on("u-name", (msg) => {
         this._cons[socket.id] = msg;
-        console.log(this._cons);
+        socket.emit("get-num", socket.id);
+        //console.log(this._cons);
         this.sendUsers();
       });
 
@@ -55,7 +58,6 @@ class Socket {
       socket.on("create-room", (msg) => {
         socket.join(socketRoomId);
         this.io.sockets.in(socketRoomId).emit("priv-room-id", socketRoomId);
-        console.log("gonderildi");
         this.sendPrivUsers(socketRoomId);
 
         //console.log(this.io.sockets.adapter.rooms.get(socketRoomId.toString()));
@@ -64,12 +66,14 @@ class Socket {
         //this.io.sockets.adapter.rooms
       });
       socket.on("send-priv-message", (message) => {
-        this.io
-          .to(socketRoomId)
-          .emit(
-            "priv-chat",
-            JSON.stringify({ name: this._cons[socket.id], msg: message })
-          );
+        let data = JSON.parse(message);
+        this.io.to(data.roomId).emit(
+          "priv-chat",
+          JSON.stringify({
+            name: this._cons[socket.id],
+            msg: data.message,
+          })
+        );
       });
       socket.on("get-num", (msg) => {
         socket.emit(

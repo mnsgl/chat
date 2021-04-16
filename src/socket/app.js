@@ -33,10 +33,10 @@ class Socket {
 
   sendName(name) {
     console.log("name : ", name);
-    this._socket.emit("u-name", name);
     this._socket.on("get-num", (number) => {
-      console.log(number);
+      this._privRoomId = number;
     });
+    this._socket.emit("u-name", name);
   }
 
   sendMessage(message) {
@@ -50,7 +50,8 @@ class Socket {
     if (!message) {
       return;
     }
-    this._socket.emit("send-priv-message", message);
+    let data = { message: message, roomId: this._privRoomId };
+    this._socket.emit("send-priv-message", JSON.stringify(data));
   }
 
   getSocket() {
@@ -59,15 +60,18 @@ class Socket {
 
   joinRoom(roomId) {
     this._socket.emit("join-room", roomId);
+    this._privRoomId = roomId;
     this.listenPrivUsers();
   }
 
   createRoom() {
     this._socket.emit("create-room", this._owner);
+    /*
     this._socket.on("priv-room-id", (id) => {
       this._privRoomId = id;
       console.log("alindi: ", id);
     });
+		*/
     this.listenPrivUsers();
   }
   getPrivUsers() {

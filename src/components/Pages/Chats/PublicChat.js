@@ -36,7 +36,7 @@ const PublicChat = ({ socket, user, users, setUsers, chat }) => {
       <ChatDiv vis={chat}>
         <LeftSide ref={refs[0]} toggle={toggle}>
           <Chat>
-            <Messages socket={socket} />
+            <Messages chatChannel="chat" socket={socket} />
           </Chat>
           <TextDiv>
             <Input

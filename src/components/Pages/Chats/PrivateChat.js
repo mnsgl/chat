@@ -16,7 +16,6 @@ const PublicChat = ({ socket, chat }) => {
   const [privUsers, setPrivUsers] = React.useState([]);
   const tset = React.useRef(null);
   let timer = React.useRef(null);
-  const timer1 = setInterval;
   const notify = React.useRef(null);
   const refs = [
     React.useRef(null),
@@ -45,37 +44,20 @@ const PublicChat = ({ socket, chat }) => {
     socket.createRoom();
     setCOwner(true);
     setIsRoomOpen(true);
-    //test();
+    setPrivRoomId(socket.getPrivRoomId());
   };
 
   const close = () => {
     if (cOwner) {
       socket.closeRoom();
+      setCOwner(false);
     } else {
       socket.leaveRoom(privRoomId);
       setInterval(timer.current);
-      setPrivRoomId(null);
     }
-    setCOwner(false);
     setIsRoomOpen(false);
-    clearInterval(timer1);
     setPrivUsers([]);
-  };
-
-  const test = () => {
-    timer1(() => {
-      if (privRoomId !== null) {
-        notify.current.style.visibility = "visible";
-        navigator.clipboard.writeText(socket.getPrivRoomId());
-        console.log("test");
-        clearInterval(timer1);
-        setTimeout(() => {
-          notify.current.style.visibility = "hidden";
-        }, 2000);
-      } else {
-        setPrivRoomId(socket.getPrivRoomId());
-      }
-    }, 100);
+    setPrivRoomId(null);
   };
 
   React.useEffect(() => {
@@ -106,6 +88,16 @@ const PublicChat = ({ socket, chat }) => {
     console.log(privUsers);
   }, [privUsers]);
 
+  React.useEffect(() => {
+    if (privRoomId !== null) {
+      notify.current.style.visibility = "visible";
+      navigator.clipboard.writeText(privRoomId);
+      setTimeout(() => {
+        notify.current.style.visibility = "hidden";
+      }, 2000);
+    }
+  }, [privRoomId]);
+
   return (
     <>
       <Notify ref={notify}>Kanal kodu panoya kopyalandi!</Notify>
@@ -124,7 +116,11 @@ const PublicChat = ({ socket, chat }) => {
         <ChatDiv vis={chat}>
           <LeftSide ref={refs[3]} toggle={toggle}>
             <Chat>
-              <Messages socket={socket} />
+              <Messages
+                cnf={{ isPriv: true, cnl: "is-closed" }}
+                chatChannel="priv-chat"
+                socket={socket}
+              />
             </Chat>
             <TextDiv>
               <Input
@@ -136,7 +132,7 @@ const PublicChat = ({ socket, chat }) => {
               <SendButton
                 disabled={!isRoomOpen}
                 onClick={() => {
-                  socket.sendMessage(message);
+                  socket.sendPrivMessage(message);
                   setMessage("");
                 }}
               >
